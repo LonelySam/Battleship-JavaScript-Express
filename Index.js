@@ -11,7 +11,7 @@ app.use(function(req, res, next) {
 });
 
 const Game = require('./src/Game.js')
-const connectDB = require('./src/ConnectionDB.js');
+const connectionDB = require('./src/ConnectionDB.js');
 const generateSchemaGame = require('./src/SchemaGameDB.js');
 
 app.get('/game',(req, res) => {
@@ -32,11 +32,15 @@ app.post('/game', (req, res) => {
 
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
-  connectDB()
+  connectionDB
     .authenticate()
     .then(() => {
       console.log('Connection has been established successfully.');
-      generateSchemaGame(connectDB(), true);
+      generateSchemaGame(connectionDB)
+      // force: true will drop the table if it already exists
+      .sync({force: true})
+        .then(() => console.log("Creation of table Game succesful"))
+        .catch(error => console.log(error))
     })
     .catch(err => {
       console.error('Unable to connect to the database:', err);

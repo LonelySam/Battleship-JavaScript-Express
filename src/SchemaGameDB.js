@@ -1,13 +1,14 @@
 const Sequelize = require('sequelize');
 
-function generateSchemaGame(instance, dropTable) {
-    const sequelize = instance;
+function generateSchemaGame(instanceSequalize) {
+    const sequelize = instanceSequalize;
 
     const Game = sequelize.define('Game', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
+        allowNull: false
       },
       challenger: {
         type: Sequelize.STRING,
@@ -23,13 +24,10 @@ function generateSchemaGame(instance, dropTable) {
       }
     },
     {
+      timestamps: false,
       tableName: 'Game',
+      freezeTableName: true,
     });
-
-    // force: true will drop the table if it already exists
-    Game.sync({force: dropTable})
-      .then(() => console.log("Creation of table Game succesful"))
-      .catch(error => console.log(error))
 
     return Game;
 }
