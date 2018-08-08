@@ -11,6 +11,8 @@ app.use(function(req, res, next) {
 });
 
 const Game = require('./src/Game.js')
+const connectDB = require('./src/ConnectionDB.js');
+const generateSchemaGame = require('./src/SchemaGameDB.js');
 
 app.get('/game',(req, res) => {
   Game.join(req.query.token)
@@ -30,4 +32,13 @@ app.post('/game', (req, res) => {
 
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
+  connectDB()
+    .authenticate()
+    .then(() => {
+      console.log('Connection has been established successfully.');
+      generateSchemaGame(connectDB(), true);
+    })
+    .catch(err => {
+      console.error('Unable to connect to the database:', err);
+    });
 })
