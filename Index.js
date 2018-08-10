@@ -12,7 +12,7 @@ app.use(function(req, res, next) {
 
 const Game = require('./src/Game.js')
 const connectionDB = require('./src/ConnectionDB.js');
-const generateSchemaGame = require('./src/SchemaGameDB.js');
+const generateGameSchema = require('./src/GameSchemaDB.js');
 
 app.get('/game',(req, res) => {
   Game.join(req.query.token)
@@ -36,12 +36,10 @@ app.listen(3000, () => {
     .authenticate()
     .then(() => {
       console.log('Connection has been established successfully.');
-      generateSchemaGame(connectionDB)
-      // force: true will drop the table if it already exists
-      .sync({force: true})
-        .then(() => console.log("Creation of table Game succesful"))
-        .catch(error => console.log(error))
+      return generateGameSchema(connectionDB)
+        .sync({force: false})
     })
+    .then(() => console.log("Creation of table Game succesful"))
     .catch(err => {
       console.error('Unable to connect to the database:', err);
     });

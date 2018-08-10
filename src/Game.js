@@ -1,7 +1,6 @@
-const dbGame = [];
 const idHelper = require('./IdHelper.js');
 const connectionDB = require('./ConnectionDB.js');
-const generateSchemaGame = require('./SchemaGameDB.js');
+const generateGameSchema = require('./GameSchemaDB.js');
 
 class Game {
 	constructor({cols = 10, rows = 10} = {}){
@@ -9,50 +8,42 @@ class Game {
 		this.rows = rows;
 	}
 	static create({cols = 10, rows = 10} = {}) {
-		// const challenger = idHelper();
-		// const token = idHelper();
-		//
-		// const newGame = generateSchemaGame(connectionDB)
-		// .build({
-		// 	challenger: challenger,
-		// 	token: token
-		// });
-		// newGame.save()
-		// .then(game => {
-		// 	return new Promise((resolve, reject) => {
-		// 		resolve({
-		// 			id: game.dataValues.id,
-		// 			session: `http://localhost:3000/game?token=${game.dataValues.token}`,
-		// 			playerId : game.dataValues.playerId
-		// 		});
-		// 	});
-		// })
-		// .catch(error => console.log(error))
+		const challenger = idHelper();
+		const token = idHelper();
 
-		// const game = new Game({cols,rows});
-		// game.id = dbGame.length + 1;
-		// game.playerId = idHelper();
-		// const token = idHelper();
-		// game.token = token
-		// dbGame.push(game);
-		// game.session = `http://localhost:3000/game?token=${token}`;
-		//
-		// return Promise.resolve({
-		// 	id : game.id,
-		// 	session : game.session,
-		// 	playerId : game.playerId
-		// })
+		const newGame = generateGameSchema(connectionDB)
+			.build({
+				challenger: challenger,
+				token: token
+			});
+		return newGame.save()
+			.then(game => {
+				return {
+					id: game.dataValues.id,
+					session: `http://localhost:3000/game?token=${game.dataValues.token}`,
+					playerId : game.dataValues.playerId
+				}
+			})
+			.catch(error => {
+				console.log(error);
+				throw error;
+			});
 	}
 
 	static join(token) {
-		const game = dbGame.find(game => game.token === token);
-		if(game === undefined) {
-			return Promise.reject()
-		}
-		return Promise.resolve({
-			id : game.id,
-			playerId : idHelper()
-		});
+		const gameModel = generateGameSchema(connectionDB);
+		return gameModel.findOne({ where: {token: token} })
+			.then((gameFound) => {
+				const idAdversary = idHelper();
+				return gameFound.update({
+					adversary: idAdversary
+				});
+			})
+			.then(savedGame => savedGame.dataValues)
+			.catch(error => {
+				console.log(error);
+				throw error;
+			});
 	}
 }
 

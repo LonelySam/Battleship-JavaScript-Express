@@ -1,9 +1,7 @@
 const Sequelize = require('sequelize');
 
-function generateSchemaGame(instanceSequalize) {
-    const sequelize = instanceSequalize;
-
-    const Game = sequelize.define('Game', {
+function generateGameSchema(sequelizeInstance) {
+    return sequelizeInstance.define('Game', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -28,8 +26,6 @@ function generateSchemaGame(instanceSequalize) {
       tableName: 'Game',
       freezeTableName: true,
     });
-
-    return Game;
 }
 
-module.exports = generateSchemaGame;
+module.exports = generateGameSchema;
