@@ -1,6 +1,6 @@
 const idHelper = require('./IdHelper.js');
-const connectionDB = require('./ConnectionDB.js');
-const generateGameSchema = require('./GameSchemaDB.js');
+const connectionDB = require('../database/ConnectionDB.js');
+const generateGameSchema = require('../models/GameSchemaDB.js');
 
 class Game {
 	constructor({cols = 10, rows = 10} = {}){
@@ -33,7 +33,7 @@ class Game {
 	static join(token) {
 		const gameModel = generateGameSchema(connectionDB);
 		return gameModel.findOne({ where: {token: token} })
-			.then((gameFound) => {
+		  .then((gameFound) => {
 				const idAdversary = idHelper();
 				return gameFound.update({
 					adversary: idAdversary

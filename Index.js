@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express()
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -11,8 +12,19 @@ app.use(function(req, res, next) {
 });
 
 const Game = require('./src/Game.js')
-const connectionDB = require('./src/ConnectionDB.js');
-const generateGameSchema = require('./src/GameSchemaDB.js');
+const Database = require('./database/Database.js');
+const Server = require('./server/Server.js');
+
+Database.init()
+  .then(() => {
+    return Server.init({ port: 3000 })
+  })
+  .then(() => {
+    console.log('Battleship listening on port 3000!')
+  })
+  .catch(error => {
+    console.error('Unable to start the application', error);
+  });
 
 app.get('/game',(req, res) => {
   Game.join(req.query.token)
@@ -28,19 +40,4 @@ app.post('/game', (req, res) => {
       res.send(game)
     })
     .catch(error => console.error(error))
-})
-
-app.listen(3000, () => {
-  console.log('Example app listening on port 3000!')
-  connectionDB
-    .authenticate()
-    .then(() => {
-      console.log('Connection has been established successfully.');
-      return generateGameSchema(connectionDB)
-        .sync({force: false})
-    })
-    .then(() => console.log("Creation of table Game succesful"))
-    .catch(err => {
-      console.error('Unable to connect to the database:', err);
-    });
 })

@@ -6,7 +6,8 @@ const connectionDB = new Sequelize('Battleship', 'sa', '123', {
   dialect: 'mssql',
   dialectOptions: {
     instanceName: 'MSSQLSERVER',
-    encrypt: true
+    encrypt: true,
+    trustedConnection: true
   },
   operatorsAliases: false
 });
