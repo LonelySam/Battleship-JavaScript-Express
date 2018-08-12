@@ -1,23 +1,27 @@
 const Sequelize = require('sequelize');
 
-function generateGameSchema(sequelizeInstance) {
-  return sequelizeInstance.define('Game', {
+function generateShipSchema(sequelizeInstance) {
+  return sequelizeInstance.define('Ship', {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false
     },
-    token: {
+    name: {
       type: Sequelize.STRING,
+      allowNull: false
+    },
+    size: {
+      type: Sequelize.INTEGER,
       allowNull: false
     }
   },
   {
     timestamps: false,
-    tableName: 'Game',
+    tableName: 'Ship',
     freezeTableName: true,
   });
 }
 
-module.exports = generateGameSchema;
+module.exports = generateShipSchema;

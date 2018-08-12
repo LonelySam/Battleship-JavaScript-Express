@@ -15,17 +15,6 @@ const Game = require('./src/Game.js')
 const Database = require('./database/Database.js');
 const Server = require('./server/Server.js');
 
-Database.init()
-  .then(() => {
-    return Server.init({ port: 3000 })
-  })
-  .then(() => {
-    console.log('Battleship listening on port 3000!')
-  })
-  .catch(error => {
-    console.error('Unable to start the application', error);
-  });
-
 app.get('/game',(req, res) => {
   Game.join(req.query.token)
   .then(game => {
@@ -41,3 +30,15 @@ app.post('/game', (req, res) => {
     })
     .catch(error => console.error(error))
 })
+
+Database.init()
+  .then(() => {
+    // return Server.init({ port: 3000 }) //Analyze why it is not working if listening in other file
+    return app.listen(3000);
+  })
+  .then(() => {
+    console.log('Battleship listening on port 3000!')
+  })
+  .catch(error => {
+    console.log('Unable to start the application', error);
+  });

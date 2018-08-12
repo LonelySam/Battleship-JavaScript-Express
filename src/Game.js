@@ -1,28 +1,31 @@
 const idHelper = require('./IdHelper.js');
 const connectionDB = require('../database/ConnectionDB.js');
 const generateGameSchema = require('../models/GameSchemaDB.js');
+const generatePlayerSchema = require('../models/PlayerSchemaDB.js');
 
 class Game {
-	constructor({cols = 10, rows = 10} = {}){
-		this.cols = cols;
-		this.rows = rows;
-	}
 	static create({cols = 10, rows = 10} = {}) {
-		const challenger = idHelper();
+		const playerId = idHelper();
 		const token = idHelper();
-
+		let response = {}
 		const newGame = generateGameSchema(connectionDB)
 			.build({
-				challenger: challenger,
 				token: token
 			});
 		return newGame.save()
 			.then(game => {
-				return {
-					id: game.dataValues.id,
-					session: `http://localhost:3000/game?token=${game.dataValues.token}`,
-					playerId : game.dataValues.playerId
-				}
+				response.gameId = game.dataValues.id;
+				response.session = `http://localhost:3000/game?token=${game.dataValues.token}`;
+				return generatePlayerSchema(connectionDB)
+					.build({
+						id: playerId,
+						game_id: game.dataValues.id
+					})
+					.save();
+			})
+			.then((player) => {
+				response.playerId = player.dataValues.id;
+				return response;
 			})
 			.catch(error => {
 				console.log(error);
@@ -32,14 +35,22 @@ class Game {
 
 	static join(token) {
 		const gameModel = generateGameSchema(connectionDB);
+		let response = {};
 		return gameModel.findOne({ where: {token: token} })
 		  .then((gameFound) => {
-				const idAdversary = idHelper();
-				return gameFound.update({
-					adversary: idAdversary
-				});
+				response.gameId = gameFound.dataValues.id;
+				const playerId = idHelper();
+				return generatePlayerSchema(connectionDB)
+					.build({
+						id: playerId,
+						game_id: gameFound.dataValues.id
+					})
+					.save();
 			})
-			.then(savedGame => savedGame.dataValues)
+			.then(player => {
+				response.playerId = player.dataValues.id;
+				return response;
+			})
 			.catch(error => {
 				console.log(error);
 				throw error;
