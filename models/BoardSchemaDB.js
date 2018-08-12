@@ -1,8 +1,9 @@
 const Sequelize = require('sequelize');
+
 const generatePlayerSchema = require('./PlayerSchemaDB.js');
 
 function generateBoardSchema(sequelizeInstance) {
-  return sequelizeInstance.define('Game', {
+  return sequelizeInstance.define('Board', {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,

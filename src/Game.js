@@ -1,7 +1,12 @@
-const idHelper = require('./IdHelper.js');
 const connectionDB = require('../database/ConnectionDB.js');
+const idHelper = require('./IdHelper.js');
+const generateBoardSchema = require('../models/BoardSchemaDB.js');
 const generateGameSchema = require('../models/GameSchemaDB.js');
 const generatePlayerSchema = require('../models/PlayerSchemaDB.js');
+
+//Changes their value only with create method. Default value 10 if not created
+let rowsTemporary = 10;
+let colsTemporary = 10;
 
 class Game {
 	static create({cols = 10, rows = 10} = {}) {
@@ -25,6 +30,18 @@ class Game {
 			})
 			.then((player) => {
 				response.playerId = player.dataValues.id;
+				return generateBoardSchema(connectionDB)
+					.build({
+						rows: rows,
+						cols: cols,
+						player_id: player.dataValues.id
+					})
+					.save();
+			})
+			.then(board => {
+				rowsTemporary = rows;
+				colsTemporary = cols;
+				response.boardId = board.dataValues.id;
 				return response;
 			})
 			.catch(error => {
@@ -47,8 +64,18 @@ class Game {
 					})
 					.save();
 			})
-			.then(player => {
+			.then((player) => {
 				response.playerId = player.dataValues.id;
+				return generateBoardSchema(connectionDB)
+					.build({
+						rows: rowsTemporary,
+						cols: colsTemporary,
+						player_id: player.dataValues.id
+					})
+					.save();
+			})
+			.then(board => {
+				response.boardId = board.dataValues.id;
 				return response;
 			})
 			.catch(error => {

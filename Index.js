@@ -1,18 +1,20 @@
-const express = require('express');
 const bodyParser = require('body-parser');
+const express = require('express');
+
 const app = express()
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
-const Game = require('./src/Game.js')
+const Board = require('./src/Board.js')
 const Database = require('./database/Database.js');
+const Game = require('./src/Game.js')
 const Server = require('./server/Server.js');
 
 app.get('/game',(req, res) => {
@@ -29,6 +31,20 @@ app.post('/game', (req, res) => {
       res.send(game)
     })
     .catch(error => console.error(error))
+})
+
+app.put('/game/:gameId/player/:playerId/board', (req, res) => {
+  const gameId = req.params.gameId;
+  const playerId = req.params.playerId;
+  const shipsArray = req.body;
+  Board.createPositioningShip({gameId, playerId, shipsArray})
+    .then(result => {
+      res.send(result)
+    })
+    .catch(error => {
+      res.send(error)
+      console.error(error)
+    })
 })
 
 Database.init()

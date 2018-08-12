@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+
 const generateGameSchema = require('./GameSchemaDB.js');
 
 function generatePlayerSchema(sequelizeInstance) {
