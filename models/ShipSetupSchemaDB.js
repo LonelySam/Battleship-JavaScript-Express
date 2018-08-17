@@ -2,8 +2,8 @@ const Sequelize = require('sequelize');
 
 const generateBoardSchema = require('./BoardSchemaDB.js');
 
-function positioningShipSchema(sequelizeInstance) {
-  return sequelizeInstance.define('PositioningShip', {
+function generateShipSetupSchema(sequelizeInstance) {
+  return sequelizeInstance.define('ShipSetup', {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -36,9 +36,9 @@ function positioningShipSchema(sequelizeInstance) {
   },
   {
     timestamps: false,
-    tableName: 'PositioningShip',
+    tableName: 'ShipSetup',
     freezeTableName: true,
   });
 }
 
-module.exports = positioningShipSchema;
+module.exports = generateShipSetupSchema;

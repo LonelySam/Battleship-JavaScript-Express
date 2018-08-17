@@ -4,18 +4,19 @@ const generateBoardSchema = require('../models/BoardSchemaDB.js');
 const generateGameSchema = require('../models/GameSchemaDB.js');
 const generatePlayerSchema = require('../models/PlayerSchemaDB.js');
 
-//Changes their value only with create method. Default value 10 if not created
-let rowsTemporary = 10;
-let colsTemporary = 10;
+const MAX_SHIPS = 5;
 
 class Game {
 	static create({cols = 10, rows = 10} = {}) {
 		const playerId = idHelper();
 		const token = idHelper();
-		let response = {}
+		const response = {}
 		const newGame = generateGameSchema(connectionDB)
 			.build({
-				token: token
+				token: token,
+				rows: rows,
+				cols: cols,
+				max_ships: MAX_SHIPS
 			});
 		return newGame.save()
 			.then(game => {
@@ -32,15 +33,11 @@ class Game {
 				response.playerId = player.dataValues.id;
 				return generateBoardSchema(connectionDB)
 					.build({
-						rows: rows,
-						cols: cols,
 						player_id: player.dataValues.id
 					})
 					.save();
 			})
 			.then(board => {
-				rowsTemporary = rows;
-				colsTemporary = cols;
 				response.boardId = board.dataValues.id;
 				return response;
 			})
@@ -52,7 +49,7 @@ class Game {
 
 	static join(token) {
 		const gameModel = generateGameSchema(connectionDB);
-		let response = {};
+		const response = {};
 		return gameModel.findOne({ where: {token: token} })
 		  .then((gameFound) => {
 				response.gameId = gameFound.dataValues.id;
@@ -68,8 +65,6 @@ class Game {
 				response.playerId = player.dataValues.id;
 				return generateBoardSchema(connectionDB)
 					.build({
-						rows: rowsTemporary,
-						cols: colsTemporary,
 						player_id: player.dataValues.id
 					})
 					.save();

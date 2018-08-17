@@ -2,44 +2,42 @@ const connectionDB = require('../database/ConnectionDB.js');
 const generateBoardSchema = require('../models/BoardSchemaDB.js');
 const generateGameSchema = require('../models/GameSchemaDB.js');
 const generatePlayerSchema = require('../models/PlayerSchemaDB.js');
-const generatePositioningShipSchema = require('../models/PositioningShipSchemaDB.js');
-const ValidateShip = require('./ValidateShip');
+const generateShipSetupSchema = require('../models/ShipSetupSchemaDB.js');
+const ShipSetupValidator = require('./ShipSetupValidator.js');
 
 class Board {
-  static createPositioningShip({gameId = 0, playerId = 0, shipsArray = []} = {}) {
+  static createShipSetup({gameId = 0, playerId = 0, shipsArray = []} = {}) {
     const boardModel = generateBoardSchema(connectionDB);
     const gameModel = generateGameSchema(connectionDB);
     const playerModel = generatePlayerSchema(connectionDB);
-    const positioningShipModel = generatePositioningShipSchema(connectionDB);
+    const shipSetupModel = generateShipSetupSchema(connectionDB);
     
     return gameModel.findOne( { where: {id: gameId} } )
       .then(gameFound => {
-        return playerModel.findOne({
-          where: {
-            id: playerId,
-            game_id: gameFound.dataValues.id
-          }
-        });
+        const {rows, cols, max_ships} = gameFound.dataValues;
+        return ShipSetupValidator.isInBoard({rows, cols, shipsArray, max_ships});
+        
+      })
+      .then(result => {
+        if (result.success)
+        {
+          return playerModel.findOne({
+            where: {
+              id: playerId,
+            }
+          })
+        } else {
+          throw result;
+        }
       })
       .then(playerFound => {
         return boardModel.findOne({ where: { player_id: playerFound.dataValues.id } });
       })
       .then(boardFound => {
         const boardId = boardFound.dataValues.id;
-        const rows = boardFound.dataValues.rows;
-        const cols = boardFound.dataValues.cols;
-        return ValidateShip.numberOfShips(shipsArray)
-          .then(() => ValidateShip.isInBoard({rows, cols, shipsArray}))
-          .then(result => {
-            if (result.success)
-            {
-              shipsArray.forEach(ship => ship.board_id = boardId);
-              //Maybe here we should register the data with FindOrCreate if the user can somehow change the position of the ships
-              return positioningShipModel.bulkCreate(shipsArray);
-            } else {
-              throw result;
-            }
-          })
+        shipsArray.forEach(ship => ship.board_id = boardId);
+        //Maybe here we should register the data with FindOrCreate if the user can somehow change the position of the ships
+        return shipSetupModel.bulkCreate(shipsArray);
       })
       .then(() => {
         return "Positions saved successfully";

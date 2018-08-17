@@ -11,7 +11,19 @@ function generateGameSchema(sequelizeInstance) {
     token: {
       type: Sequelize.STRING,
       allowNull: false
-    }
+    },
+    rows: {
+      type: Sequelize.INTEGER,
+      allowNull: false
+    },
+    cols: {
+      type: Sequelize.INTEGER,
+      allowNull: false
+    },
+    max_ships: {
+      type: Sequelize.INTEGER,
+      allowNull: false
+    },
   },
   {
     timestamps: false,

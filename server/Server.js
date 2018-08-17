@@ -12,6 +12,10 @@ app.use(function(req, res, next) {
 });
 
 class Server {
+  static getExpressInstance() {
+    return app;
+  }
+
   static init({port = 3000}) {
     return app.listen(port)
   }

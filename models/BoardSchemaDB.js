@@ -10,14 +10,6 @@ function generateBoardSchema(sequelizeInstance) {
       primaryKey: true,
       allowNull: false
     },
-    rows: {
-      type: Sequelize.INTEGER,
-      allowNull: false
-    },
-    cols: {
-      type: Sequelize.INTEGER,
-      allowNull: false
-    },
     player_id: {
       type: Sequelize.STRING,
       references: {
