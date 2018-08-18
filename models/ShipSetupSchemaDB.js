@@ -1,35 +1,44 @@
 const Sequelize = require('sequelize');
 
-function generateGameSchema(sequelizeInstance) {
-  return sequelizeInstance.define('Game', {
+const generateBoardSchema = require('./BoardSchemaDB.js');
+
+function generateShipSetupSchema(sequelizeInstance) {
+  return sequelizeInstance.define('ShipSetup', {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false
     },
-    token: {
+    orientation: {
       type: Sequelize.STRING,
       allowNull: false
     },
-    rows: {
+    type: {
       type: Sequelize.INTEGER,
       allowNull: false
     },
-    cols: {
+    x: {
       type: Sequelize.INTEGER,
       allowNull: false
     },
-    max_ships: {
+    y: {
       type: Sequelize.INTEGER,
       allowNull: false
     },
+    board_id: {
+      type: Sequelize.INTEGER,
+      references: {
+        model: generateBoardSchema(sequelizeInstance),
+        key: 'id'
+      }
+    }
   },
   {
     timestamps: false,
-    tableName: 'Game',
+    tableName: 'ShipSetup',
     freezeTableName: true,
   });
 }
 
-module.exports = generateGameSchema;
+module.exports = generateShipSetupSchema;

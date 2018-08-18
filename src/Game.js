@@ -1,50 +1,83 @@
-const idHelper = require('./IdHelper.js');
 const connectionDB = require('../database/ConnectionDB.js');
+const idHelper = require('./IdHelper.js');
+const generateBoardSchema = require('../models/BoardSchemaDB.js');
 const generateGameSchema = require('../models/GameSchemaDB.js');
+const generatePlayerSchema = require('../models/PlayerSchemaDB.js');
+
+const MAX_SHIPS = 5;
 
 class Game {
-	constructor({cols = 10, rows = 10} = {}){
-		this.cols = cols;
-		this.rows = rows;
-	}
-	static create({cols = 10, rows = 10} = {}) {
-		const challenger = idHelper();
-		const token = idHelper();
+  static create({ cols = 10, rows = 10 } = {}) {
+    const playerId = idHelper();
+    const token = idHelper();
+    const response = {}
+    const newGame = generateGameSchema(connectionDB)
+      .build({
+        token: token,
+        rows: rows,
+        cols: cols,
+        max_ships: MAX_SHIPS
+      });
+    return newGame.save()
+      .then(game => {
+        response.gameId = game.dataValues.id;
+        response.session = `http://localhost:3000/game?token=${game.dataValues.token}`;
+        return generatePlayerSchema(connectionDB)
+          .build({
+            id: playerId,
+            game_id: game.dataValues.id
+          })
+          .save();
+      })
+      .then((player) => {
+        response.playerId = player.dataValues.id;
+        return generateBoardSchema(connectionDB)
+          .build({
+            player_id: player.dataValues.id
+          })
+          .save();
+      })
+      .then(board => {
+        response.boardId = board.dataValues.id;
+        return response;
+      })
+      .catch(error => {
+        console.log(error);
+        throw error;
+      });
+  }
 
-		const newGame = generateGameSchema(connectionDB)
-			.build({
-				challenger: challenger,
-				token: token
-			});
-		return newGame.save()
-			.then(game => {
-				return {
-					id: game.dataValues.id,
-					session: `http://localhost:3000/game?token=${game.dataValues.token}`,
-					playerId : game.dataValues.playerId
-				}
-			})
-			.catch(error => {
-				console.log(error);
-				throw error;
-			});
-	}
-
-	static join(token) {
-		const gameModel = generateGameSchema(connectionDB);
-		return gameModel.findOne({ where: {token: token} })
-		  .then((gameFound) => {
-				const idAdversary = idHelper();
-				return gameFound.update({
-					adversary: idAdversary
-				});
-			})
-			.then(savedGame => savedGame.dataValues)
-			.catch(error => {
-				console.log(error);
-				throw error;
-			});
-	}
+  static join(token) {
+    const gameModel = generateGameSchema(connectionDB);
+    const response = {};
+    return gameModel.findOne({ where: { token: token } })
+      .then((gameFound) => {
+        response.gameId = gameFound.dataValues.id;
+        const playerId = idHelper();
+        return generatePlayerSchema(connectionDB)
+          .build({
+            id: playerId,
+            game_id: gameFound.dataValues.id
+          })
+          .save();
+      })
+      .then((player) => {
+        response.playerId = player.dataValues.id;
+        return generateBoardSchema(connectionDB)
+          .build({
+            player_id: player.dataValues.id
+          })
+          .save();
+      })
+      .then(board => {
+        response.boardId = board.dataValues.id;
+        return response;
+      })
+      .catch(error => {
+        console.log(error);
+        throw error;
+      });
+  }
 }
 
 module.exports = Game
