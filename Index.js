@@ -4,12 +4,12 @@ const Game = require('./src/Game.js')
 const Server = require('./server/Server.js');
 const app = Server.getExpressInstance();
 
-app.get('/game',(req, res) => {
+app.get('/game', (req, res) => {
   Game.join(req.query.token)
-  .then(game => {
+    .then(game => {
       res.send(game)
     })
-  .catch(error => console.error(error))
+    .catch(error => console.error(error))
 })
 
 app.post('/game', (req, res) => {
@@ -24,7 +24,7 @@ app.put('/game/:gameId/player/:playerId/board', (req, res) => {
   const gameId = req.params.gameId;
   const playerId = req.params.playerId;
   const shipsArray = req.body;
-  Board.createShipSetup({gameId, playerId, shipsArray})
+  Board.createShipSetup({ gameId, playerId, shipsArray })
     .then(result => {
       res.send(result)
     })

@@ -2,9 +2,9 @@ const connectionDB = require('../database/ConnectionDB.js');
 const generateShipSchema = require('../models/ShipSchemaDB.js');
 
 class ShiptSetupValidator {
-  static isInBoard({rows = 10, cols = 10, shipsArray = [], max_ships = 5}) {
+  static isInBoard({ rows = 10, cols = 10, shipsArray = [], max_ships = 5 }) {
     const size = shipsArray.length;
-    if(size !== max_ships) {
+    if (size !== max_ships) {
       return Promise.reject(
         {
           success: false,
@@ -19,6 +19,7 @@ class ShiptSetupValidator {
         shipsArray.forEach(ship => {
           let shipType = ship.type;
           let shipRow = defaultShips.find(ship => ship.dataValues.id === shipType);
+
           if (ship.orientation === 'H') {
             let endPositionShip = ship.x + shipRow.dataValues.size;
             if (endPositionShip > cols) {
@@ -28,6 +29,7 @@ class ShiptSetupValidator {
               };
             }
           }
+
           if (ship.orientation === 'V') {
             let endPositionShip = ship.y + shipRow.dataValues.size;
             if (endPositionShip > rows) {
@@ -38,6 +40,7 @@ class ShiptSetupValidator {
             }
           }
         })
+        
         return {
           success: true,
           message: `All the ships met the condition`
