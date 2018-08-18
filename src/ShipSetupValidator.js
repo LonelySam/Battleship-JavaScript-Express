@@ -1,7 +1,7 @@
 const connectionDB = require('../database/ConnectionDB.js');
 const generateShipSchema = require('../models/ShipSchemaDB.js');
 
-class ValidateShip {
+class ShiptSetupValidator {
   static isInBoard({rows = 10, cols = 10, shipsArray = [], max_ships = 5}) {
     const size = shipsArray.length;
     if(size !== max_ships) {
@@ -50,4 +50,4 @@ class ValidateShip {
   }
 }
 
-module.exports = ValidateShip;
+module.exports = ShiptSetupValidator;

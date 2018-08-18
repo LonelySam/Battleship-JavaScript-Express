@@ -11,12 +11,11 @@ class Board {
     const gameModel = generateGameSchema(connectionDB);
     const playerModel = generatePlayerSchema(connectionDB);
     const shipSetupModel = generateShipSetupSchema(connectionDB);
-    
+
     return gameModel.findOne( { where: {id: gameId} } )
       .then(gameFound => {
         const {rows, cols, max_ships} = gameFound.dataValues;
         return ShipSetupValidator.isInBoard({rows, cols, shipsArray, max_ships});
-        
       })
       .then(result => {
         if (result.success)
@@ -40,7 +39,10 @@ class Board {
         return shipSetupModel.bulkCreate(shipsArray);
       })
       .then(() => {
-        return "Positions saved successfully";
+        return {
+          success: true,
+          message: "Positions saved successfully"
+        };
       })
       .catch(error => {
 				console.log(error);
